@@ -12,16 +12,28 @@ import unittest
 
 
 def SetLiteral(formula, lit):
-    # Define your function here
-
+    """
+    :param formula: lista de listas que codifican una formula proposicional.
+    :param lit: entero que representa un literal.
+    :return: formula simplificada segun el literal.
+    """
+    for i in range(len(formula)):
+        if lit or -lit in formula[i]: # si literal esta en la formula
+            if lit > 0:  # si literal es verdadero.
+                if lit in formula[i]: # si literal esta en la clausula, se elimina la clausula.
+                    formula.remove(formula[i])
+            if lit < 0:  # si literal el falso.
+                if lit in formula[i]: # si literal esta en la clausula, se elimina el literal.
+                    formula[i].remove(lit)
+    return formula
 
 def IsSatisfiable(formula):
     # Define your function here
-
+    pass
 
 def BuildModel(formula):
     # Define your function here
-
+    pass
 
 class Tests(unittest.TestCase):
     def setUp(self):
