@@ -19,17 +19,17 @@ def SetLiteral(formula, lit):
     :param lit: entero que representa un literal.
     :return: formula simplificada segun el literal.
     """
-    i = len(formula)
-    while i >= 0:
+    i = len(formula)  # contador que tiene el largo de la formula.
+    while i >= 0:  # bucle para recorrer la formula.
         i -= 1
-        if i >= 0:
+        if i >= 0:  # si el contador es positivo
             if lit in formula[i]:  # si literal esta en la formula.
                 formula.remove(formula[i])  # si literal esta en la clausula, se elimina la clausula.
-                i-=1
-        if i >= 0:
+                i-=1  # se reduce el indice ya que se redujo la formula al perder una clausula.
+        if i >= 0:  # si el contador es positivo
             if -lit in formula[i]:  # si la negacion del literal esta en la formula.
                 formula[i].remove(-lit)  # si literal esta en la clausula, se elimina el literal.
-    return formula
+    return formula  # se retorna la formula.
 
 
 def IsSatisfiable(formula):
@@ -39,56 +39,61 @@ def IsSatisfiable(formula):
     :return: True si es satisfactible, False si no.
     """
     largoFormula = len(formula)
-    if largoFormula == 0:
+    if largoFormula == 0:  # si el largo de la formula es cero, la formula es satisfactible.
         return True
-    if largoFormula > 0:
-        for i in range(largoFormula):
-            if len(formula[i]) == 0:  # si hay una clausula con largo cero.
+    if largoFormula > 0:  # si la formula tiene largo mayor a cero.
+        for i in range(largoFormula):  # se recorre la formula para revisar sus clausulas.
+            if len(formula[i]) == 0:  # si hay una clausula con largo cero la formula no es satisfactible.
                 return False
     i = random.randint(0, largoFormula - 1)  # se elige un indice i arbitrario.
-    largoClausula = len(formula[i])
-    j = random.randint(0, largoClausula - 1)  # se elige un indice j arbitrario.
+    j = 0  # se elige un indice j arbitrario, en este caso sera siempre el primero de la clausula.
     literal = formula[i][j]  # se elige un literal arbitrario.
-    formulaAux = copy.copy(formula)  # se copia la formula
-    SetLiteral(formula, literal)  # se setea el literal a true y se simplifica la formula
-    if IsSatisfiable(formula):  # si es safisfactible
+    formulaAux = copy.copy(formula)  # se copia la formula.
+    SetLiteral(formula, literal)  # se setea el literal a true y se simplifica la formula.
+    if IsSatisfiable(formula):  # si es safisfactible con el literal seteado en True.
         return True
-    SetLiteral(formulaAux, -literal)
-    if IsSatisfiable(formulaAux):
+    literal = -literal  # se cambia el signo al literal.
+    SetLiteral(formulaAux, literal)  # se setea el literal a false y se simplifica la formula.
+    if IsSatisfiable(formulaAux):  # si es safisfactible con el literal seteado en False.
         return True
-    return
+    return  # se retorna
 
 
 def BuildModel(formula):
-    par = {}
-    valuacion = {}
-    formulaAux = copy.copy(formula)  # se copia la formula
-    if IsSatisfiable(formula):
-        largoFormula = 1
-        while largoFormula>0:
-            largoFormula = len(formulaAux)
-            if largoFormula == 0:
+    valuacion = {}  # diccionario donde se almacenara la valuacion.
+    formulaAux = copy.copy(formula)  # se copia la formula.
+    if IsSatisfiable(formula):  # si la formula es satisfactible se procede.
+        largoFormula = 1  # valor default para entrar al bucle a continuacion.
+        while largoFormula > 0:  # se revisa el largo de la formula.
+            largoFormula = len(formulaAux)  # se extra el largo de la formula.
+            if largoFormula == 0:  # si el largo de la formula es cero, la formula es satisfactible.
                 break
             for i in range(largoFormula):
                 if len(formulaAux[i]) == 0:  # si hay una clausula con largo cero.
                     break
             i = random.randint(0, largoFormula - 1)  # se elige un indice i arbitrario.
-            largoClausula = len(formulaAux[i])
-            if largoClausula > 0:
-                j = random.randint(0, largoClausula - 1)  # se elige un indice j arbitrario.
-            else:
-                break
+            j = 0  # se elige un indice j arbitrario, en este caso sera siempre el primero de la clausula.
             literal = formulaAux[i][j]  # se elige un literal arbitrario.
-            if literal > 0:  # si el literal es True.
-                valuacion[literal] = True
-                SetLiteral(formulaAux, literal)  # se setea el literal a true y se simplifica la formula
-            else:  # si el literal es False.
-                valuacion[literal] = False
-                SetLiteral(formulaAux, literal)  # se setea el literal a true y se simplifica la formula
-        par[True] = valuacion
+            valuacion[literal] = True
+            SetLiteral(formulaAux, literal)  # se setea el literal a true y se simplifica la formula.
+        checkValuacion(valuacion)  # se revisa la valuacion para que tenga sus literales positivos.
+        par = (True, valuacion)  # se prepara valuacion en el formato pedido
     else:
-        par[False] = valuacion
-    return par
+        par = (False, valuacion)  # se prepara valuacion en el formato pedido
+    return par  # se retorna el par
+
+def checkValuacion(valuacion):
+    """
+    funcion que revisa si la valuacion tiene valores negativos, cambiando su signo y su valor de verdad por
+    el opuestio segun lo solicitado en la tarea.
+    :param valuacion:
+    :return:
+    """
+    for valor in valuacion:  # se recorre la valuacion.
+        if valor < 0:
+            valorPositivo = abs(valor)  # se cambia el signo del literal.
+            del valuacion[valor]  # se elimina el literal anterior.
+            valuacion[valorPositivo] = False  # se almacena el literal negado.
 
 class Tests(unittest.TestCase):
     def setUp(self):
